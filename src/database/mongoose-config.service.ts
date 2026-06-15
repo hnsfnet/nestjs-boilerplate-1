@@ -1,26 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  MongooseModuleOptions,
-  MongooseOptionsFactory,
-} from '@nestjs/mongoose';
-import { AllConfigType } from '../config/config.type';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
-
-@Injectable()
-export class MongooseConfigService implements MongooseOptionsFactory {
-  constructor(private readonly configService: ConfigService<AllConfigType>) {}
-
-  createMongooseOptions(): MongooseModuleOptions {
-    return {
-      uri: this.configService.get('database.url', { infer: true }),
-      dbName: this.configService.get('database.name', { infer: true }),
-      user: this.configService.get('database.username', { infer: true }),
-      pass: this.configService.get('database.password', { infer: true }),
-      connectionFactory(connection) {
-        connection.plugin(mongooseAutoPopulate);
-        return connection;
-      },
-    };
-  }
-}
+/**
+ * Back-compat re-export.
+ *
+ * The Mongoose config service now lives under `./options/` alongside the other
+ * database assembly helpers. This shim keeps the historic import path working
+ * for existing consumers (e.g. the document seed module) so they don't all
+ * need to be touched in the same change.
+ */
+export { MongooseConfigService } from './options/mongoose-config.service';
