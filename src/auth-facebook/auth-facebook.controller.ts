@@ -37,6 +37,9 @@ export class AuthFacebookController {
     const socialData =
       await this.authFacebookService.getProfileByToken(loginDto);
 
-    return this.authService.validateSocialLogin('facebook', socialData);
+    return this.authService.validateSocialLogin(
+      this.authFacebookService.providerName,
+      socialData,
+    );
   }
 }
