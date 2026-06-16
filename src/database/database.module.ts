@@ -3,8 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-import databaseConfig from './config/database.config';
-import { DatabaseConfig } from './config/database-config.type';
+import { isDocumentDatabase } from './database-type.helper';
 import { MongooseConfigService } from './options/mongoose-config.service';
 import { TypeOrmConfigService } from './options/typeorm-config.service';
 
@@ -14,17 +13,15 @@ import { TypeOrmConfigService } from './options/typeorm-config.service';
  * running against a relational (TypeORM) or document (Mongoose) store -
  * importing `DatabaseModule.forRoot()` is enough.
  *
- * The actual connection options for each driver are assembled by
- * {@link TypeOrmConfigService} and {@link MongooseConfigService} so that this
- * module only coordinates *which* one is wired up, not *how*.
+ * The database-type branch lives in {@link isDocumentDatabase} so that this
+ * module only coordinates *which* driver is wired up, not *how*. Driver
+ * connection options are assembled by {@link TypeOrmConfigService} and
+ * {@link MongooseConfigService} respectively.
  */
 @Module({})
 export class DatabaseModule {
   static forRoot(): DynamicModule {
-    const databaseChoice = (databaseConfig() as DatabaseConfig)
-      .isDocumentDatabase;
-
-    const databaseDriverModule = databaseChoice
+    const databaseDriverModule = isDocumentDatabase()
       ? MongooseModule.forRootAsync({
           useClass: MongooseConfigService,
         })

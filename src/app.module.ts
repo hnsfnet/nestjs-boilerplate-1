@@ -16,29 +16,43 @@ import { MailerModule } from './mailer/mailer.module';
 import { SessionModule } from './session/session.module';
 import { UsersModule } from './users/users.module';
 
+// --- config loaders (grouped by concern) ---
+// Core
+import appConfig from './config/app.config';
+import databaseConfig from './database/config/database.config';
+// Auth
+import authConfig from './auth/config/auth.config';
 import appleConfig from './auth-apple/config/apple.config';
 import facebookConfig from './auth-facebook/config/facebook.config';
 import googleConfig from './auth-google/config/google.config';
-import authConfig from './auth/config/auth.config';
-import appConfig from './config/app.config';
-import databaseConfig from './database/config/database.config';
+// Features
 import fileConfig from './files/config/file.config';
 import mailConfig from './mail/config/mail.config';
+
+/**
+ * All config loaders in one place so the `ConfigModule.forRoot` call below
+ * stays declarative.  Add new loaders here — not inline in the `load` array —
+ * so the list remains easy to scan.
+ */
+const configLoaders = [
+  // Core
+  appConfig,
+  databaseConfig,
+  // Auth
+  authConfig,
+  appleConfig,
+  facebookConfig,
+  googleConfig,
+  // Features
+  fileConfig,
+  mailConfig,
+];
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        databaseConfig,
-        authConfig,
-        appConfig,
-        mailConfig,
-        fileConfig,
-        facebookConfig,
-        googleConfig,
-        appleConfig,
-      ],
+      load: configLoaders,
       envFilePath: ['.env'],
     }),
     DatabaseModule.forRoot(),
