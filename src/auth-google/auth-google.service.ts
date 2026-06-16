@@ -1,26 +1,25 @@
-import {
-  HttpStatus,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import { SocialInterface } from '../social/interfaces/social.interface';
+import { BaseSocialAuthService } from '../social/base-social-auth.service';
+import { SocialAuthException } from '../social/exceptions/social-auth.exception';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto';
 import { AllConfigType } from '../config/config.type';
 
 @Injectable()
-export class AuthGoogleService {
+export class AuthGoogleService extends BaseSocialAuthService<AuthGoogleLoginDto> {
   private google: OAuth2Client;
 
   constructor(private readonly configService: ConfigService<AllConfigType>) {
+    super();
     this.google = new OAuth2Client(
       configService.get('google.clientId', { infer: true }),
       configService.get('google.clientSecret', { infer: true }),
     );
   }
 
-  async getProfileByToken(
+  protected async fetchProfile(
     loginDto: AuthGoogleLoginDto,
   ): Promise<SocialInterface> {
     const ticket = await this.google.verifyIdToken({
@@ -33,12 +32,7 @@ export class AuthGoogleService {
     const data = ticket.getPayload();
 
     if (!data) {
-      throw new UnprocessableEntityException({
-        status: HttpStatus.UNPROCESSABLE_ENTITY,
-        errors: {
-          user: 'wrongToken',
-        },
-      });
+      throw new SocialAuthException();
     }
 
     return {
